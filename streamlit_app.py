@@ -53,8 +53,8 @@ with st.sidebar:
     st.sidebar.title("About")
     st.sidebar.info(
         """
-        NFW: <https://spatial.utk.edu/nfw>
-        Scholar: <https://spatial.utk.edu/scholar>
+        NFW: <https://nfw.gishub.org>
+        Scholar: <https://scholar.gishub.org>
     """
     )
 
@@ -63,4 +63,3 @@ for app in apps:
     if app["title"] == selected:
         app["func"]()
         break
-
