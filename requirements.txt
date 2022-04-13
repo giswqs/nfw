@@ -6,6 +6,7 @@ keplergl
 # leafmap
 localtileserver
 nbserverproxy
+owslib
 streamlit
 streamlit-option-menu
 git+https://github.com/giswqs/leafmap
