@@ -63,8 +63,8 @@ def app():
         # zoom = st.slider('Zoom', 1, 24, 6, step=1)
         zoom = st.text_input("Zoom", "4")
 
-    # with col6:
-    #     checkbox = st.checkbox("Add OS 25 inch")
+    with col6:
+        clip = st.checkbox("Clip to ROI")
 
     Map = geemap.Map(
         center=[float(lat), float(lon)],
@@ -79,6 +79,10 @@ def app():
     measure = plugins.MeasureControl(position="bottomleft", active_color="orange")
     measure.add_to(Map)
 
+    st.session_state["ROI"] = ee.FeatureCollection(
+        "users/giswqs/MRB/NWI_HU8_Boundary_Simplify"
+    )
+
     if left_name in basemaps:
         left_layer = basemaps[left_name]
     else:
@@ -88,6 +92,9 @@ def app():
             data = LANDCOVERS[left_name]
         elif left_name in LANDFORMS:
             data = LANDFORMS[left_name]
+
+        if clip:
+            data["id"] = data["id"].clip(st.session_state["ROI"])
         if left_palette != "Default":
             if left_name in DEMS:
                 data["vis"]["palette"] = cm.get_palette(left_palette, 15)
@@ -102,6 +109,10 @@ def app():
             data = LANDCOVERS[right_name]
         elif right_name in LANDFORMS:
             data = LANDFORMS[right_name]
+
+        if clip:
+            data["id"] = data["id"].clip(st.session_state["ROI"])
+
         if right_palette != "Default":
             if right_name in DEMS:
                 data["vis"]["palette"] = cm.get_palette(right_palette, 15)
@@ -119,6 +130,7 @@ def app():
     Map.split_map(left_layer, right_layer)
 
     sinks_30m = ee.FeatureCollection("users/giswqs/MRB/NED_30m_sinks")
+
     Map.addLayer(sinks_30m, {}, "Depressions (30m)", False)
 
     sinks_10m = ee.FeatureCollection("users/giswqs/MRB/NED_10m_sinks")
@@ -138,9 +150,6 @@ def app():
         huc8.style(**{"fillColor": "00000000", "width": 1}), {}, "NHD-HUC10", False
     )
 
-    st.session_state["ROI"] = ee.FeatureCollection(
-        "users/giswqs/MRB/NWI_HU8_Boundary_Simplify"
-    )
     ROI_style = st.session_state["ROI"].style(
         **{"color": "ff0000", "width": 2, "fillColor": "00000000"}
     )

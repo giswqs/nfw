@@ -140,6 +140,7 @@ def app():
         plugin_LatLngPopup=False,
         locate_control=True,
         plugin_Draw=True,
+        Draw_export=True,
     )
     Map.add_basemap("HYBRID")
     Map.add_basemap("TERRAIN")
