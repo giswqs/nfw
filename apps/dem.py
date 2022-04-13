@@ -70,7 +70,9 @@ def app():
         "ESRI Global Land Cover": ee.ImageCollection(
             "projects/sat-io/open-datasets/landcover/ESRI_Global-LULC_10m"
         ).mosaic(),
-        "NLCD 2016": ee.Image("USGS/NLCD_RELEASES/2016_REL/2016").select("landcover"),
+        "NLCD 2019": ee.Image("USGS/NLCD_RELEASES/2019_REL/NLCD/2019").select(
+            "landcover"
+        ),
         "Global ALOS Landforms": ee.Image("CSP/ERGo/1_0/Global/ALOS_landforms").select(
             "constant"
         ),
@@ -190,7 +192,7 @@ def app():
                 vis,
                 dataset,
             )
-            if dataset == "NLCD 2016":
+            if dataset == "NLCD 2019":
                 Map.add_legend(title="NLCD Land Cover", builtin_legend="NLCD")
             elif dataset == "ESA WorldCover":
                 Map.add_legend(
