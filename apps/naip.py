@@ -34,7 +34,7 @@ def app():
 
     Map = geemap.Map(plugin_Draw=True, Draw_export=True)
     with col1:
-        basemap = st.selectbox("Select a basemap", geemap.folium_basemaps.keys())
+        basemap = st.selectbox("Select a basemap", geemap.basemaps.keys())
     Map.add_basemap(basemap)
 
     roi = ee.FeatureCollection("users/giswqs/MRB/NWI_HU8_Boundary_Simplify")

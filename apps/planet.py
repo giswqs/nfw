@@ -13,7 +13,7 @@ def app():
 
     Map = geemap.Map(plugin_Draw=True, Draw_export=False)
     with col1:
-        basemap = st.selectbox("Select a basemap", geemap.folium_basemaps.keys())
+        basemap = st.selectbox("Select a basemap", geemap.basemaps.keys())
     Map.add_basemap(basemap)
 
     roi = ee.FeatureCollection("users/giswqs/MRB/NWI_HU8_Boundary_Simplify")
@@ -23,7 +23,7 @@ def app():
         ratio = st.radio("Planet imagery", ("Quarterly", "Monthly"))
 
     with col3:
-        year = st.slider("Select a year", 2016, 2021, 2020)
+        year = st.slider("Select a year", 2016, 2022, 2020)
 
     with col5:
         lat = st.text_input("Center latitude", "40")
@@ -37,11 +37,17 @@ def app():
     if ratio == "Quarterly":
         with col4:
             quarter = st.slider("Select a quarter", 1, 4, 1)
-            Map.add_planet_by_quarter(year, quarter)
+            try:
+                Map.add_planet_by_quarter(year, quarter)
+            except Exception as e:
+                st.error(e)
     else:
         with col4:
             month = st.slider("Select a month", 1, 12, 1)
-            Map.add_planet_by_month(year, month)
+            try:
+                Map.add_planet_by_month(year, month)
+            except Exception as e:
+                st.error(e)
             # checkbox = st.checkbox("Add Planet imagery")
 
             # if checkbox:

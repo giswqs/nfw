@@ -6,7 +6,7 @@ def app():
 
     st.header("Introduction")
     st.markdown(
-        "This interactive web app (<https://spatial.utk.edu/nfw>) is dedicated to the Non-floodplain Wetlands (NFW) Project."
+        "This interactive web app (<https://nfw.gishub.org>) is dedicated to the Non-floodplain Wetlands (NFW) Project."
     )
     st.markdown(
         """

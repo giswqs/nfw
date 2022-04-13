@@ -53,7 +53,7 @@ with st.sidebar:
     st.sidebar.title("About")
     st.sidebar.info(
         """
-        NFW: <https://nfw.gishub.org>
+        NFW: <https://nfw.gishub.org>        
         Scholar: <https://scholar.gishub.org>
     """
     )

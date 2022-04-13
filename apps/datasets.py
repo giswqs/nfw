@@ -20,7 +20,7 @@ def app():
 
     col1, col2 = st.columns([1.5, 4])
 
-    basemap = col1.selectbox("Select a basemap", geemap.folium_basemaps.keys())
+    basemap = col1.selectbox("Select a basemap", geemap.basemaps.keys())
     Map.add_basemap(basemap)
 
     select_holder = col2.empty()
