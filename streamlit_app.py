@@ -8,6 +8,7 @@ from apps import (
     naip,
     planet,
     resources,
+    split,
     timelapse,
     water,
     wms,
@@ -21,6 +22,7 @@ st.set_page_config(page_title="NFW Project", layout="wide")
 apps = [
     {"func": home.app, "title": "Home", "icon": "house"},
     {"func": dem.app, "title": "DEM Datasets", "icon": "building"},
+    {"func": split.app, "title": "Split-panel Map", "icon": "layout-split"},
     {"func": planet.app, "title": "Planet Imagery", "icon": "globe"},
     {"func": naip.app, "title": "NAIP Imagery", "icon": "camera"},
     {"func": datasets.app, "title": "Surface Water Datasets", "icon": "moisture"},

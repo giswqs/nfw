@@ -33,18 +33,28 @@ def app():
 
     with st.expander("Click to see the data sources", False):
         markdown = """
-       
-            - [SRTM](https://developers.google.com/earth-engine/datasets/catalog/CGIAR_SRTM90_V4) (90-m)
-            - [NASA SRTM](https://developers.google.com/earth-engine/datasets/catalog/USGS_SRTMGL1_003) (30-m)
-            - [ASTER GDEM](https://samapriya.github.io/awesome-gee-community-datasets/projects/aster) (30-m)
-            - [GMTED](https://developers.google.com/earth-engine/datasets/catalog/USGS_GMTED2010) (232-m)
-            - [ALOS DSM](https://developers.google.com/earth-engine/datasets/catalog/JAXA_ALOS_AW3D30_V3_2) (30-m)
-            - [GLO-30 DSM](https://samapriya.github.io/awesome-gee-community-datasets/projects/glo30/) (30-m)
-            - [FABDEM](https://samapriya.github.io/awesome-gee-community-datasets/projects/fabdem/) (30-m)
-            - [NED](https://developers.google.com/earth-engine/datasets/catalog/USGS_3DEP_10m) (10-m)
-            - [ESA WorldCover](https://developers.google.com/earth-engine/datasets/catalog/ESA_WorldCover_v100) (10-m)
-            - [ESRI Global Land Cover](https://samapriya.github.io/awesome-gee-community-datasets/projects/esrilc2020/) (10-m)
-            - [NLCD](https://developers.google.com/earth-engine/datasets/catalog/USGS_NLCD_RELEASES_2016_REL#description) (30-m)
+        **DEM datasets:**
+
+        - [SRTM](https://developers.google.com/earth-engine/datasets/catalog/CGIAR_SRTM90_V4) (90-m)
+        - [NASA SRTM](https://developers.google.com/earth-engine/datasets/catalog/USGS_SRTMGL1_003) (30-m)
+        - [ASTER GDEM](https://samapriya.github.io/awesome-gee-community-datasets/projects/aster) (30-m)
+        - [GMTED](https://developers.google.com/earth-engine/datasets/catalog/USGS_GMTED2010) (232-m)
+        - [ALOS DSM](https://developers.google.com/earth-engine/datasets/catalog/JAXA_ALOS_AW3D30_V3_2) (30-m)
+        - [GLO-30 DSM](https://samapriya.github.io/awesome-gee-community-datasets/projects/glo30/) (30-m)
+        - [FABDEM](https://samapriya.github.io/awesome-gee-community-datasets/projects/fabdem/) (30-m)
+        - [NED](https://developers.google.com/earth-engine/datasets/catalog/USGS_3DEP_10m) (10-m)
+
+        **Land cover datasets:**
+
+        - [ESA WorldCover](https://developers.google.com/earth-engine/datasets/catalog/ESA_WorldCover_v100) (10-m)
+        - [ESRI Global Land Cover](https://samapriya.github.io/awesome-gee-community-datasets/projects/esrilc2020/) (10-m)
+        - [NLCD](https://developers.google.com/earth-engine/datasets/catalog/USGS_NLCD_RELEASES_2016_REL#description) (30-m)
+
+        **Landform datasets:**
+
+        - [Global ALOS Landforms](https://developers.google.com/earth-engine/datasets/catalog/CSP_ERGo_1_0_Global_ALOS_landforms) (90-m)
+        - [Global SRTM Landforms](https://developers.google.com/earth-engine/datasets/catalog/CSP_ERGo_1_0_Global_SRTM_landforms) (90-m)
+        - [US NED Landforms](https://developers.google.com/earth-engine/datasets/catalog/CSP_ERGo_1_0_US_landforms) (10-m)
         
         """
         st.markdown(markdown)
@@ -61,6 +71,13 @@ def app():
             "projects/sat-io/open-datasets/landcover/ESRI_Global-LULC_10m"
         ).mosaic(),
         "NLCD 2016": ee.Image("USGS/NLCD_RELEASES/2016_REL/2016").select("landcover"),
+        "Global ALOS Landforms": ee.Image("CSP/ERGo/1_0/Global/ALOS_landforms").select(
+            "constant"
+        ),
+        "Global SRTM Landforms": ee.Image("CSP/ERGo/1_0/Global/SRTM_landforms").select(
+            "constant"
+        ),
+        "NED Landforms": ee.Image("CSP/ERGo/1_0/US/landforms").select("constant"),
     }
 
     dem_options = {
@@ -86,7 +103,7 @@ def app():
 
     with row1_col2:
         lc_datasets = st.multiselect(
-            "Select land cover datasets", list(landcover_options.keys())
+            "Select landcover/landform datasets", list(landcover_options.keys())
         )
         dem_datasets = st.multiselect("Select DEM datasets", dem_options.keys())
         palette = st.selectbox(
@@ -138,6 +155,28 @@ def app():
                     "max": 10,
                     "palette": list(geemap.builtin_legends["ESRI_LandCover"].values()),
                 }
+            elif "Landforms" in dataset:
+                vis = {
+                    "min": 11,
+                    "max": 42,
+                    "palette": [
+                        "141414",
+                        "383838",
+                        "808080",
+                        "EBEB8F",
+                        "F7D311",
+                        "AA0000",
+                        "D89382",
+                        "DDC9C9",
+                        "DCCDCE",
+                        "1C6330",
+                        "68AA63",
+                        "B5C98E",
+                        "E1F0E5",
+                        "a975ba",
+                        "6f198c",
+                    ],
+                }
             else:
                 vis = {}
             if clip:
@@ -161,6 +200,8 @@ def app():
                 Map.add_legend(
                     title="ESRI Global Land Cover", builtin_legend="ESRI_LandCover"
                 )
+            elif "Landforms" in dataset:
+                Map.add_legend(title="Landforms", builtin_legend="ALOS_landforms")
 
     if dem_datasets:
         for dataset in dem_datasets:
