@@ -23,7 +23,7 @@ def app():
         ratio = st.radio("Planet imagery", ("Quarterly", "Monthly"))
 
     with col3:
-        year = st.slider("Select a year", 2016, 2022, 2020)
+        year = st.slider("Select a year", 2016, 2022, 2021)
 
     with col5:
         lat = st.text_input("Center latitude", "40")

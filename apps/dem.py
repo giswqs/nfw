@@ -82,6 +82,15 @@ def app():
         "NED Landforms": ee.Image("CSP/ERGo/1_0/US/landforms").select("constant"),
     }
 
+    legend_options = {
+        "ESA WorldCover": "ESA_WorldCover",
+        "ESRI Global Land Cover": "ESRI_LandCover",
+        "NLCD 2019": "NLCD",
+        "Global ALOS Landforms": "ALOS_landforms",
+        "Global SRTM Landforms": "ALOS_landforms",
+        "NED Landforms": "ALOS_landforms",
+    }
+
     dem_options = {
         "STRM": ee.Image("CGIAR/SRTM90_V4"),
         "NASA SRTM": ee.Image("USGS/SRTMGL1_003").select("elevation"),
@@ -128,11 +137,15 @@ def app():
         add_diff = st.checkbox("Add DEM differencing")
         if add_diff:
             with st.expander("DEM differencing", True):
-                first_dem = st.selectbox("First DEM", dem_options.keys())
-                second_dem = st.selectbox("Second DEM", dem_options.keys(), index=1)
+                first_dem = st.selectbox("First DEM", dem_options.keys(), index=1)
+                second_dem = st.selectbox("Second DEM", dem_options.keys(), index=3)
                 min_max = st.slider("Min/Max for visualization", -100, 100, (-20, 20))
                 diff_palette = st.selectbox(
                     "Color palette", palettes, index=palettes.index("coolwarm")
+                )
+                reducer = st.selectbox(
+                    "Statistics",
+                    ["mean", "median", "minimum", "maximum", "std", "sum", "variance"],
                 )
 
     Map = geemap.Map(
@@ -283,3 +296,27 @@ def app():
     with row1_col1:
 
         Map.to_streamlit(height=650)
+
+        if lc_datasets and add_diff:
+            for landcover in lc_datasets:
+                lc = landcover_options[landcover]
+                if clip:
+                    lc = lc.clip(st.session_state["ROI"])
+                    region = lc.geometry().bounds()
+                else:
+                    region = ee.Geometry.BBox(-180, -85, 180, 85)
+
+                labels = geemap.builtin_legends[legend_options[landcover]].keys()
+
+                df = geemap.image_stats_by_zone(
+                    diff,
+                    lc,
+                    reducer=reducer,
+                    region=region,
+                    labels=labels,
+                )
+                with row1_col1:
+                    st.write(
+                        f"Statstics for {landcover} - {reducer} of {first_dem} - {second_dem}"
+                    )
+                    st.dataframe(df)

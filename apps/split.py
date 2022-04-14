@@ -118,13 +118,6 @@ def app():
                 data["vis"]["palette"] = cm.get_palette(right_palette, 15)
         right_layer = geemap.ee_tile_layer(data["id"], data["vis"], right_name)
 
-    # if checkbox:
-    #     for index, name in enumerate(names):
-    #         if "OS 25 inch" in name:
-    #             m.add_tile_layer(
-    #                 links[index], name, attribution="National Library of Scotland"
-    #             )
-
     if left_name == right_name:
         st.error("Please select different layers")
     Map.split_map(left_layer, right_layer)
