@@ -3,6 +3,8 @@ import geemap.foliumap as geemap
 import geemap.colormaps as cm
 import geopandas as gpd
 import streamlit as st
+import plotly.express as px
+import pandas as pd
 
 
 @st.cache
@@ -302,21 +304,47 @@ def app():
                 lc = landcover_options[landcover]
                 if clip:
                     lc = lc.clip(st.session_state["ROI"])
-                    region = lc.geometry().bounds()
+                    region = st.session_state["ROI"].geometry().bounds()
                 else:
                     region = ee.Geometry.BBox(-180, -85, 180, 85)
 
                 labels = geemap.builtin_legends[legend_options[landcover]].keys()
 
-                df = geemap.image_stats_by_zone(
-                    diff,
-                    lc,
-                    reducer=reducer,
-                    region=region,
-                    labels=labels,
-                )
-                with row1_col1:
+                try:
+                    df = geemap.image_stats_by_zone(
+                        diff,
+                        lc,
+                        reducer=reducer,
+                        region=region,
+                        labels=labels,
+                    )
+
                     st.write(
-                        f"Statstics for {landcover} - {reducer} of {first_dem} - {second_dem}"
+                        f"Statstics by {landcover} - {reducer} of {first_dem} - {second_dem}"
                     )
                     st.dataframe(df)
+                except Exception as e:
+                    st.error(e)
+
+            hist = diff.reduceRegion(
+                **{
+                    "reducer": ee.Reducer.histogram(maxBuckets=20),
+                    "bestEffort": True,
+                    "geometry": region,
+                    "scale": 1000,
+                }
+            ).getInfo()
+            x = hist["elevation"]["bucketMeans"]
+            y = hist["elevation"]["histogram"]
+            hist_df = pd.DataFrame(
+                {
+                    "Value": x,
+                    "Count": y,
+                }
+            )
+            fig = px.bar(
+                hist_df, x="Value", y="Count", title="Histogram of Elevation Difference"
+            )
+            st.write("Histogram of Elevation Difference")
+            st.dataframe(hist_df)
+            st.plotly_chart(fig)
