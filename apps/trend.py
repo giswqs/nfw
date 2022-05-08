@@ -28,19 +28,27 @@ def app():
         url
     ) = "https://hydro.nationalmap.gov/arcgis/services/wbd/MapServer/WMSServer?"
     wms_layers, wms_titles = geemap.get_wms_layers(url, return_titles=True)
+    wms_layers = ["User drawn ROI"] + wms_layers[2:]
+    wms_titles = ["User drawn ROI"] + wms_titles[2:]
 
     with col2:
         wms_layer = st.selectbox(
-            "Select a Watershed Boundary Dataset (WBD):", wms_titles, index=4
+            "Select a Watershed Boundary Dataset (WBD) or ROI:", wms_titles, index=2
         )
         huc_level = wms_layer.split("-")[0].zfill(2)
 
-    Map.add_wms_layer(
-        wms_url,
-        wms_layers[wms_titles.index(wms_layer)],
-        name=wms_layer,
-        transparent=True,
-    )
+        if wms_layer == "User drawn ROI":
+            st.text("Draw a polygon on the map to define a ROI.")
+        else:
+            st.text("Click on the map to select a watershed.")
+
+    if wms_layer != "User drawn ROI":
+        Map.add_wms_layer(
+            wms_url,
+            wms_layers[wms_titles.index(wms_layer)],
+            name=wms_layer,
+            transparent=True,
+        )
 
     # Map = folium.Map()
 
@@ -67,16 +75,22 @@ def app():
     if (m is not None) and (m["last_clicked"] is not None):
         with col2:
             st.text("Clicked location:")
+
             st.write(m["last_clicked"])
             coord = m["last_clicked"]
             lat = coord["lat"]
             lng = coord["lng"]
             roi = ee.Geometry.Point([lng, lat])
-            fc = (
-                ee.FeatureCollection(f"USGS/WBD/2017/HUC{huc_level}")
-                .filterBounds(roi)
-                .first()
-            )
+
+            if "(" in wms_layer:
+                fc = (
+                    ee.FeatureCollection(f"USGS/WBD/2017/HUC{huc_level}")
+                    .filterBounds(roi)
+                    .first()
+                )
+            elif wms_layer == "User drawn ROI":
+                fc = ee.FeatureCollection([m["last_active_drawing"]])
+
             with st.expander("Selected HUC:"):
                 st.write(fc.toDictionary().getInfo())
 
