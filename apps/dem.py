@@ -328,7 +328,7 @@ def app():
 
             hist = diff.reduceRegion(
                 **{
-                    "reducer": ee.Reducer.histogram(maxBuckets=20),
+                    "reducer": ee.Reducer.histogram(maxBuckets=100),
                     "bestEffort": True,
                     "geometry": region,
                     "scale": 1000,

@@ -10,6 +10,7 @@ from apps import (
     resources,
     split,
     timelapse,
+    trend,
     water,
     wms,
 )
@@ -29,6 +30,7 @@ apps = [
     {"func": water.app, "title": "NAIP Water Mapping", "icon": "water"},
     {"func": wms.app, "title": "ESA Global Land Cover", "icon": "map"},
     {"func": lidar.app, "title": "LiDAR Data", "icon": "lightning"},
+    {"func": trend.app, "title": "Trend Analysis", "icon": "graph-up-arrow"},
     {"func": timelapse.app, "title": "Timelapse", "icon": "film"},
     {"func": resources.app, "title": "Useful Resources", "icon": "book"},
 ]
