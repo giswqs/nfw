@@ -33,7 +33,7 @@ def app():
 
     with col2:
         wms_layer = st.selectbox(
-            "Select a Watershed Boundary Dataset (WBD) or ROI:", wms_titles, index=2
+            "Select a Watershed Boundary Dataset (WBD) or ROI:", wms_titles, index=3
         )
         huc_level = wms_layer.split("-")[0].zfill(2)
 
