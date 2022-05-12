@@ -50,6 +50,9 @@ def app():
             transparent=True,
         )
 
+    # depressions = ee.FeatureCollection("users/giswqs/MRB/NED_10m_sinks_v2")
+    # Map.addLayer(depressions, {}, "NED Depressions (10m)", False)
+
     # Map = folium.Map()
 
     # st.session_state["ROI"] = ee.FeatureCollection(

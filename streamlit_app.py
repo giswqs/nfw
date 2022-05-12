@@ -60,6 +60,7 @@ with st.sidebar:
         - NFW: <https://nfw.gishub.org>        
         - GSW: <https://gsw.gishub.org>
         - Scholar: <https://scholar.gishub.org>
+        - Depressions: <https://gishub.org/depressions>
     """
     )
 
