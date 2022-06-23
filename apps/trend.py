@@ -18,7 +18,7 @@ def app():
     st.title("Analyzing Surface Water Dynamics")
     col1, col2 = st.columns([3, 1])
 
-    Map = geemap.Map(search_control=False, center=[44.96, -100.40], zoom_start=9)
+    Map = geemap.Map(search_control=False, center=[44.96, -100.40], zoom_start=9, Draw_export=True)
     Map.add_basemap("HYBRID")
 
     jrc_url = "https://storage.googleapis.com/global-surface-water/tiles2020/occurrence/{z}/{x}/{y}.png"
