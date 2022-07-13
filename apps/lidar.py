@@ -7,7 +7,7 @@ import geemap.foliumap as geemap
 def app():
     st.title("LiDAR Data")
 
-    options = ["USGS 3DEP", "North Dakota"]
+    options = ["USGS 3DEP", "USGS 3DEP Hillshade", "North Dakota"]
     option = st.selectbox("Select an application", options)
 
     if option == "USGS 3DEP":
@@ -21,32 +21,29 @@ def app():
         visualization = {
             "min": 0,
             "max": 3000,
-            "palette": [
-                "3ae237",
-                "b5e22e",
-                "d6e21f",
-                "fff705",
-                "ffd611",
-                "ffb613",
-                "ff8b13",
-                "ff6e08",
-                "ff500d",
-                "ff0000",
-                "de0101",
-                "c21301",
-                "0602ff",
-                "235cb1",
-                "307ef3",
-                "269db1",
-                "30c8e2",
-                "32d3ef",
-                "3be285",
-                "3ff38f",
-                "86e26f",
-            ],
+            "palette": "terrain",
         }
         left_layer = geemap.ee_tile_layer(dataset, visualization, "3DEP GEE")
+        # mosaic = dataset.mosaic().setDefaultProjection("EPSG:3857")
+        # left_layer = geemap.ee_tile_layer(ee.Terrain.hillshade(mosaic), {}, "3DEP GEE")
 
+        Map.split_map(left_layer, left_layer)
+        Map.to_streamlit(height=650)
+
+    elif option == "USGS 3DEP Hillshade":
+
+        Map = geemap.Map(center=[40, -100], zoom=4)
+
+        dataset = ee.ImageCollection("USGS/3DEP/1m")
+        dataset2 = ee.Image("USGS/3DEP/10m")
+
+        mosaic = dataset.mosaic().setDefaultProjection("EPSG:3857")
+        left_layer = geemap.ee_tile_layer(
+            ee.Terrain.hillshade(mosaic), {}, "3DEP 1-m hillshade"
+        )
+
+        # Map.addLayer(ee.Terrain.hillshade(dataset2), {}, "3DEP 10-m hillshade")
+        Map.addLayer(geemap.blend(dataset2), {}, "3DEP 10-m hillshade")
         Map.split_map(left_layer, left_layer)
         Map.to_streamlit(height=650)
 
