@@ -51,7 +51,9 @@ def app():
 
         col1, col2 = st.columns([5, 1])
 
-        fc = ee.FeatureCollection("TIGER/2018/States")
+        bbox = ee.Geometry.BBox(-127.2656, 23.4834, -66.0938, 50.3455)
+
+        fc = ee.FeatureCollection("TIGER/2018/States").filterBounds(bbox)
         states = fc.aggregate_array("NAME").getInfo()
         states.sort()
 
@@ -108,6 +110,16 @@ def app():
         Map.addLayer(ee.Terrain.hillshade(mosaic), {}, "3DEP 1-m hillshade")
         style = {"color": "ffff00", "fillColor": "00000000"}
         Map.center_object(selected_fc)
+
+        if add_jrc:
+            jrc = (
+                ee.Image("JRC/GSW1_3/GlobalSurfaceWater")
+                .select("occurrence")
+                .clipToCollection(selected_fc)
+            )
+            jrc_vis = {"min": 0, "max": 100, "palette": ["ffffff", "ffbbbb", "0000ff"]}
+            Map.addLayer(jrc, jrc_vis, "JRC Water Occurrence")
+            Map.add_colorbar(jrc_vis, label="Water occurrence (%)")
 
         if add_nwi:
             nwi_id = f"projects/sat-io/open-datasets/NWI/wetlands/{name}_Wetlands"
