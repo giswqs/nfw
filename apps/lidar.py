@@ -280,6 +280,7 @@ def app():
         # )
 
         Map.addLayer(roi.style(**style), {}, "MRB")
+        Map.centerObject(roi)
 
         with row1_col1:
             Map.to_streamlit(width, height)
