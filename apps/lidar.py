@@ -78,6 +78,15 @@ def app():
         ]
 
         with col2:
+
+            set_map = st.checkbox("Set map center and zoom")
+
+            if set_map:
+                with st.expander("Set map center and zoom", True):
+                    latitude = st.number_input("Latitude", value=40)
+                    longitude = st.number_input("Longitude", value=-100)
+                    zoom = st.number_input("Zoom level", value=4)
+
             state = st.selectbox(
                 "Select a state", states, index=states.index("Nebraska")
             )
@@ -97,7 +106,7 @@ def app():
                 fill_color = st.color_picker("Select a fill color")
                 opacity = st.slider("Select a fill opacity", 0.0, 1.0, 0.5)
 
-        Map = geemap.Map(center=[40, -100], zoom=4)
+        Map = geemap.Map(center=[40, -100], zoom=4, plugin_LatLngPopup=True)
 
         Map.add_basemap("HYBRID")
 
@@ -109,7 +118,10 @@ def app():
         mosaic = dataset.mosaic().setDefaultProjection("EPSG:3857")
         Map.addLayer(ee.Terrain.hillshade(mosaic), {}, "3DEP 1-m hillshade")
         style = {"color": "ffff00", "fillColor": "00000000"}
-        Map.center_object(selected_fc)
+        if set_map:
+            Map.setCenter(longitude, latitude, zoom)
+        else:
+            Map.center_object(selected_fc)
 
         if add_jrc:
             jrc = (
