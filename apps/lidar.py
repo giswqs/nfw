@@ -27,25 +27,72 @@ def app():
         # mosaic = dataset.mosaic().setDefaultProjection("EPSG:3857")
         # left_layer = geemap.ee_tile_layer(ee.Terrain.hillshade(mosaic), {}, "3DEP GEE")
 
+        bbox = ee.Geometry.BBox(-127.2656, 23.4834, -66.0938, 50.3455)
+        states = ee.FeatureCollection("TIGER/2018/States").filterBounds(bbox)
         Map.split_map(left_layer, left_layer)
+        Map.addLayer(
+            states.style(**{"fillColor": "00000000", "color": "00000088", "width": 1}),
+            {},
+            "US States",
+        )
+
         Map.to_streamlit(height=650)
 
     elif option == "USGS 3DEP Hillshade":
 
-        Map = geemap.Map(center=[40, -100], zoom=4)
+        col1, col2 = st.columns([4, 1])
+
+        with col2:
+            latitude = st.number_input("Latitude", value=35.53)
+            longitude = st.number_input("Longitude", value=-84.43)
+            zoom = st.number_input("Zoom", value=16)
+
+            add_filter = st.checkbox("Add filter", value=False)
+
+            if add_filter:
+                reducer = st.selectbox(
+                    "Select a filter", ["min", "max", "mean", "stdDev"], index=2
+                )
+                window_size = st.number_input(
+                    "Window size", value=3, step=2, min_value=3
+                )
+
+        Map = geemap.Map(
+            center=[latitude, longitude], zoom=zoom, plugin_LatLngPopup=True
+        )
+
+        Map.add_basemap("HYBRID")
 
         dataset = ee.ImageCollection("USGS/3DEP/1m")
         dataset2 = ee.Image("USGS/3DEP/10m")
 
         mosaic = dataset.mosaic().setDefaultProjection("EPSG:3857")
+
+        if add_filter:
+            mosaic = mosaic.reduceNeighborhood(
+                **{
+                    "reducer": eval(f"ee.Reducer.{reducer}()"),
+                    "kernel": ee.Kernel.square(window_size),
+                }
+            )
+
         left_layer = geemap.ee_tile_layer(
             ee.Terrain.hillshade(mosaic), {}, "3DEP 1-m hillshade"
         )
 
         # Map.addLayer(ee.Terrain.hillshade(dataset2), {}, "3DEP 10-m hillshade")
         Map.addLayer(geemap.blend(dataset2), {}, "3DEP 10-m hillshade")
+        bbox = ee.Geometry.BBox(-127.2656, 23.4834, -66.0938, 50.3455)
+        states = ee.FeatureCollection("TIGER/2018/States").filterBounds(bbox)
         Map.split_map(left_layer, left_layer)
-        Map.to_streamlit(height=650)
+        Map.addLayer(
+            states.style(**{"fillColor": "00000000", "color": "00000088", "width": 1}),
+            {},
+            "US States",
+        )
+
+        with col1:
+            Map.to_streamlit(height=650)
 
     elif option == "USGS 3DEP with NHD":
 
