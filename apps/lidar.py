@@ -83,7 +83,17 @@ def app():
 
             name = selected_fc.first().get("STUSPS").getInfo()
 
+            add_jrc = st.checkbox("Add JRC Water Occurrence")
+
+            add_nwi = st.checkbox("Add NWI datasets")
+
             datasets = st.multiselect("Select NHD datasets", NHD_options)
+
+            if datasets:
+
+                color = st.color_picker("Select an outline color")
+                fill_color = st.color_picker("Select a fill color")
+                opacity = st.slider("Select a fill opacity", 0.0, 1.0, 0.5)
 
         Map = geemap.Map(center=[40, -100], zoom=4)
 
@@ -99,19 +109,67 @@ def app():
         style = {"color": "ffff00", "fillColor": "00000000"}
         Map.center_object(selected_fc)
 
+        if add_nwi:
+            nwi_id = f"projects/sat-io/open-datasets/NWI/wetlands/{name}_Wetlands"
+            nwi_fc = ee.FeatureCollection(nwi_id)
+
+            names = [
+                "Freshwater Forested/Shrub Wetland",
+                "Freshwater Emergent Wetland",
+                "Freshwater Pond",
+                "Estuarine and Marine Wetland",
+                "Riverine",
+                "Lake",
+                "Estuarine and Marine Deepwater",
+                "Other",
+            ]
+
+            colors = [
+                "#008837",
+                "#7FC31C",
+                "#688CC0",
+                "#66C2A5",
+                "#0190BF",
+                "#13007C",
+                "#007C88",
+                "#B28653",
+            ]
+            color_dict = ee.Dictionary(dict(zip(names, colors)))
+
+            nwi_fc = nwi_fc.map(
+                lambda f: f.set(
+                    {
+                        "style": {
+                            "width": 1,
+                            "color": "00000088",
+                            "fillColor": ee.String(
+                                color_dict.get(f.get("WETLAND_TY"))
+                            ).cat("99"),
+                        }
+                    }
+                )
+            )
+            Map.addLayer(nwi_fc.style(**{"styleProperty": "style"}), {}, "NWI")
+            Map.add_legend(title="NWI Wetland Type", builtin_legend="NWI")
+
         prefix = f"projects/sat-io/open-datasets/NHD/NHD_{name}/"
 
         for dataset in datasets:
             try:
                 data = ee.FeatureCollection(f"{prefix}{dataset}")
-                Map.addLayer(data, {}, dataset)
+
+                data_style = {
+                    "color": color[1:],
+                    "fillColor": fill_color[1:] + hex(int(opacity * 255))[2:].zfill(2),
+                }
+
+                Map.addLayer(data.style(**data_style), {}, dataset)
             except Exception as e:
                 with col2:
                     st.error(f"dataset {dataset} not found")
 
         Map.addLayer(selected_fc.style(**style), {}, state)
-        # Map.addLayer(ee.Terrain.hillshade(dataset2), {}, "3DEP 10-m hillshade")
-        # Map.split_map(left_layer, left_layer)
+
         with col1:
             Map.to_streamlit(height=650)
 
