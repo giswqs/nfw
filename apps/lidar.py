@@ -108,7 +108,7 @@ def app():
 
     elif option == "USGS 3DEP with NHD":
 
-        col1, col2 = st.columns([5, 1])
+        col1, col2 = st.columns([4, 1])
 
         bbox = ee.Geometry.BBox(-127.2656, 23.4834, -66.0938, 50.3455)
 
@@ -146,6 +146,11 @@ def app():
                     longitude = st.number_input("Longitude", value=-100)
                     zoom = st.number_input("Zoom level", value=4)
 
+            basemaps = list(geemap.basemaps.keys())
+            basemap = st.selectbox(
+                "Select a basemap", basemaps, index=basemaps.index("HYBRID")
+            )
+
             state = st.selectbox(
                 "Select a state", states, index=states.index("Nebraska")
             )
@@ -167,7 +172,7 @@ def app():
 
         Map = geemap.Map(center=[40, -100], zoom=4, plugin_LatLngPopup=True)
 
-        Map.add_basemap("HYBRID")
+        Map.add_basemap(basemap)
 
         dataset = ee.ImageCollection("USGS/3DEP/1m")
         dataset2 = ee.Image("USGS/3DEP/10m")
