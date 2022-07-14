@@ -7,7 +7,7 @@ import geemap.foliumap as geemap
 def app():
     st.title("LiDAR Data")
 
-    options = ["USGS 3DEP", "USGS 3DEP Hillshade", "North Dakota"]
+    options = ["USGS 3DEP", "USGS 3DEP Hillshade", "USGS 3DEP with NHD", "North Dakota"]
     option = st.selectbox("Select an application", options)
 
     if option == "USGS 3DEP":
@@ -46,6 +46,74 @@ def app():
         Map.addLayer(geemap.blend(dataset2), {}, "3DEP 10-m hillshade")
         Map.split_map(left_layer, left_layer)
         Map.to_streamlit(height=650)
+
+    elif option == "USGS 3DEP with NHD":
+
+        col1, col2 = st.columns([5, 1])
+
+        fc = ee.FeatureCollection("TIGER/2018/States")
+        states = fc.aggregate_array("NAME").getInfo()
+        states.sort()
+
+        NHD_options = [
+            "NHDArea",
+            "NHDFlowline",
+            "NHDLine",
+            "NHDWaterbody",
+            "NHDPoint",
+            "NHDPointEventFC",
+            "NHDLineEventFC",
+            "NHDAreaEventFC",
+            "WBDHU2",
+            "WBDHU4",
+            "WBDHU6",
+            "WBDHU8",
+            "WBDHU10",
+            "WBDHU12",
+            "WBDHU14",
+            "WBDHU16",
+            "WBDLine",
+        ]
+
+        with col2:
+            state = st.selectbox(
+                "Select a state", states, index=states.index("Nebraska")
+            )
+            selected_fc = fc.filter(ee.Filter.eq("NAME", state))
+
+            name = selected_fc.first().get("STUSPS").getInfo()
+
+            datasets = st.multiselect("Select NHD datasets", NHD_options)
+
+        Map = geemap.Map(center=[40, -100], zoom=4)
+
+        Map.add_basemap("HYBRID")
+
+        dataset = ee.ImageCollection("USGS/3DEP/1m")
+        dataset2 = ee.Image("USGS/3DEP/10m")
+
+        Map.addLayer(geemap.blend(dataset2), {}, "3DEP 10-m hillshade")
+
+        mosaic = dataset.mosaic().setDefaultProjection("EPSG:3857")
+        Map.addLayer(ee.Terrain.hillshade(mosaic), {}, "3DEP 1-m hillshade")
+        style = {"color": "ffff00", "fillColor": "00000000"}
+        Map.center_object(selected_fc)
+
+        prefix = f"projects/sat-io/open-datasets/NHD/NHD_{name}/"
+
+        for dataset in datasets:
+            try:
+                data = ee.FeatureCollection(f"{prefix}{dataset}")
+                Map.addLayer(data, {}, dataset)
+            except Exception as e:
+                with col2:
+                    st.error(f"dataset {dataset} not found")
+
+        Map.addLayer(selected_fc.style(**style), {}, state)
+        # Map.addLayer(ee.Terrain.hillshade(dataset2), {}, "3DEP 10-m hillshade")
+        # Map.split_map(left_layer, left_layer)
+        with col1:
+            Map.to_streamlit(height=650)
 
     elif option == "North Dakota":
 
