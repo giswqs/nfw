@@ -36,6 +36,12 @@ def app():
             "US States",
         )
 
+        ROI = ee.FeatureCollection("users/giswqs/MRB/NWI_HU8_Boundary_Simplify")
+        ROI_style = ROI.style(
+            **{"color": "000000", "width": 2, "fillColor": "00000000"}
+        )
+        Map.addLayer(ROI_style, {}, "Study Area", False)
+
         Map.to_streamlit(height=650)
 
     elif option == "USGS 3DEP Hillshade":
@@ -90,6 +96,12 @@ def app():
             {},
             "US States",
         )
+
+        ROI = ee.FeatureCollection("users/giswqs/MRB/NWI_HU8_Boundary_Simplify")
+        ROI_style = ROI.style(
+            **{"color": "0000FF", "width": 2, "fillColor": "00000000"}
+        )
+        Map.addLayer(ROI_style, {}, "Study Area", False)
 
         with col1:
             Map.to_streamlit(height=650)
